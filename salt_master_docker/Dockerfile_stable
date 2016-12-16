@@ -3,13 +3,7 @@ MAINTAINER Boris Feld <lothiraldan@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update && apt-get upgrade -y -o DPkg::Options::=--force-confold
-
-ENV SALT_VERSION=2016.3.0
-
-# Install salt-master deps
-RUN apt-get install -y python-apt procps pciutils python-pip python-dev
-RUN pip install salt==$SALT_VERSION cherrypy tornado
+ENV SALT_VERSION=2016.11.1
 
 # Volume for saltpad deployment with rest_cherrypy
 
@@ -19,9 +13,25 @@ ADD roots/ /srv/
 
 ADD config/run_salt_master.sh /run_salt_master.sh
 
-ADD config/master /etc/salt/master
+ADD config/master.d/saltpad_external_auth /etc/salt/master.d/saltpad_external_auth
+ADD config/master.d/saltpad_cherrypy /etc/salt/master.d/saltpad_cherrypy
+ADD config/master.d/saltpad_tornado /etc/salt/master.d/saltpad_tornado
 
-ADD config/minion /etc/salt/minion
+ADD config/minion.d/saltpad_master /etc/salt/minion.d/saltpad_master
+
+ADD config/saltstack.list /etc/apt/sources.list.d/saltstack.list
+
+RUN apt-get update 
+
+RUN apt-get install -y wget -o DPkg::Options::=--force-confold
+
+RUN wget -O - https://repo.saltstack.com/apt/ubuntu/14.04/amd64/2016.11/SALTSTACK-GPG-KEY.pub | sudo apt-key add -
+
+RUN apt-get update && apt-get upgrade -y -o DPkg::Options::=--force-confold
+
+# Install salt-master deps
+RUN apt-get install -y python-apt procps pciutils python-pip python-dev
+RUN apt-get install -y salt-common salt-master salt-minion salt-api
 
 EXPOSE 8000
 
@@ -30,4 +40,4 @@ EXPOSE 5417
 # Add user vagrant with vagrant password
 RUN useradd -m -p paX5EmO4EXy0I -s /bin/bash vagrant
 
-CMD bash /run_salt_master.sh
+CMD /run_salt_master.sh

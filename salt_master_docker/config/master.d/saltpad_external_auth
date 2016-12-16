@@ -1,0 +1,8 @@
+auto_accept: True
+external_auth:
+  pam:
+    vagrant:
+      - .*
+      - '@runner'
+      - '@wheel'
+      - '@jobs'

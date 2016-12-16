@@ -1,0 +1,8 @@
+rest_cherrypy:
+  port: 8000
+  host: 0.0.0.0
+  disable_ssl: True
+  static: /code/static
+  static_path: /static
+  app: /code/index.html
+  app_path: /saltpad
